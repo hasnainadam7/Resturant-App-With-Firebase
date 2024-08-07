@@ -1,0 +1,86 @@
+{
+  "project_info": {
+    "project_number": "754262512945",
+    "project_id": "getxfirebase1",
+    "storage_bucket": "getxfirebase1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:754262512945:android:dec499f81099c00de60c10",
+        "android_client_info": {
+          "package_name": "com.algoace.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCxukM8NmIANHiiL2Ohumdwm5UPxFh1fM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:754262512945:android:0f260e20a616a8c1e60c10",
+        "android_client_info": {
+          "package_name": "com.example.firebasegetx"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCxukM8NmIANHiiL2Ohumdwm5UPxFh1fM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:754262512945:android:bed36754a48c26ece60c10",
+        "android_client_info": {
+          "package_name": "com.example.resturantapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCxukM8NmIANHiiL2Ohumdwm5UPxFh1fM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:754262512945:android:694b27f5bff491e6e60c10",
+        "android_client_info": {
+          "package_name": "com.loginsignupbloc.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCxukM8NmIANHiiL2Ohumdwm5UPxFh1fM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
