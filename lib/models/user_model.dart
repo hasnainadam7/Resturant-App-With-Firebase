@@ -1,23 +1,35 @@
+import 'address_model.dart';
+
 class UserModel {
-  String? name;
+  String? photoURL;
+  String? phoneNumber;
+  String? displayName;
+  int? orderCount;
   String? email;
-  String? phone;
-  int id;
-  int orderCount;
 
   UserModel(
-      {this.email,
-        this.phone,
-        this.name,
-        required this.id,
-        required this.orderCount});
+      {this.photoURL,
+        this.phoneNumber,
+        // this.address,
+        this.displayName,
+        this.orderCount,
+        this.email});
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-        email: json["email"],
-        phone: json["phone"],
-        name: json["f_name"],
-        id: json['id'],
-        orderCount: json['order_count']);
+  UserModel.fromJson(Map<String, dynamic> json) {
+    photoURL = json['photoURL'];
+    phoneNumber = json['phoneNumber'];
+    displayName = json['displayName'];
+    orderCount = json['orderCount'];
+    email = json['email'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['photoURL'] = photoURL;
+    data['phoneNumber'] = phoneNumber;
+     data['displayName'] = displayName;
+    data['orderCount'] = orderCount;
+    data['email'] = email;
+    return data;
   }
 }

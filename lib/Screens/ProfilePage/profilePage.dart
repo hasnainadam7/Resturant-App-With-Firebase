@@ -1,97 +1,89 @@
 // ignore_for_file: non_constant_identifier_names, file_names
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resturantapp/Routes/routesHelper.dart';
 import 'package:resturantapp/controller/auth_controller.dart';
 import 'package:resturantapp/controller/cart_repo_controller.dart';
 import 'package:resturantapp/controller/location_repo_controller.dart';
-import 'package:resturantapp/controller/payment_repo_controller.dart';
-import 'package:resturantapp/controller/user_repo_controller.dart';
+import 'package:resturantapp/controller/product_repo_controller.dart';
 import 'package:resturantapp/utils/colors.dart';
 import 'package:resturantapp/utils/dimmensions.dart';
 import 'package:resturantapp/widgets/AppIcons.dart';
 import 'package:resturantapp/widgets/BigText.dart';
-import 'package:resturantapp/widgets/CustomLoadingBar.dart';
-
 import '../../models/user_model.dart';
 
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
-
-  @override
-  State<ProfilePage> createState() => _ProfilePageState();
-}
-
-class _ProfilePageState extends State<ProfilePage> {
-  late UserModel res;
-
-  Future<UserModel?> getData() async {
-    if (Get.find<AuthRepoController>().isUserLoggedIn()) {
-      await Get.find<UserRepoController>().getUserInfo();
-      res = Get.find<UserRepoController>().userModel;
-      return res;
-    }
-    return null;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // TODO: implement initState
-    getData();
-  }
+class ProfilePage extends StatelessWidget {
+  ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<UserRepoController>(builder: (userRepoController) {
-      return GetBuilder<AuthRepoController>(builder: (authRepoContorller) {
-        if (authRepoContorller.isUserLoggedIn()) {
-          return !userRepoController.isLoading
-              ? ProfileSection(res, Check: true)
-              : const Customloadingbar();
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasData) {
+          return GetBuilder<AuthRepoController>(builder: (authRepoController) {
+            if(authRepoController.userModel !=null){
+              return _ProfileSection( authRepoController.userModel!);
+            }else{
+              return const Center(child: CircularProgressIndicator());
+            }
+
+
+          });
+
+          // User is signed in
         } else {
-          return Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: Color(
-                          0xFFE5E7EB), // using the light gray color from your color scheme
-                      image: DecorationImage(
-                        image: AssetImage("assets/image/signintocontinue.png"),
-                        fit: BoxFit
-                            .cover, // ensures the image covers the container
-                      ),
-                    ),
-                    height: 200, // setting a height for the container
-                    width: double.infinity, // making the container full width
-                  ),
-                  SizedBox(
-                      height: Dimension.Height10 *
-                          2), // adding space between the image and the text
-                  GestureDetector(
-                    onTap: () {
-                      // Get.toNamed(Routeshelper.getLoginPageRoute());
-                      Navigator.pushReplacementNamed(context,Routeshelper.getLoginPageRoute());
-                    },
-                    child: const BigText(
-                      color: Color(0xFF120c78),
-                      text: 'Sign Up to continue',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
+          return _LogoutScreen(context); // User is not signed in
         }
-      });
-    });
+      },
+    );
   }
 
-  Scaffold ProfileSection(UserModel user, {bool Check = true}) {
+  Scaffold _LogoutScreen(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              decoration: const BoxDecoration(
+                color: Color(
+                    0xFFE5E7EB), // using the light gray color from your color scheme
+                image: DecorationImage(
+                  image: AssetImage("assets/images/signintocontinue.png"),
+                  fit: BoxFit.cover, // ensures the image covers the container
+                ),
+              ),
+              height: 200, // setting a height for the container
+              width: double.infinity, // making the container full width
+            ),
+            SizedBox(
+                height: Dimension.Height10 *
+                    2), // adding space between the image and the text
+            GestureDetector(
+              onTap: () {
+                // Get.toNamed(Routeshelper.getLoginPageRoute());
+                Navigator.pushNamed(
+                  context,
+                  Routeshelper.getLoginPageRoute(),
+                );
+              },
+              child: const BigText(
+                color: Color(0xFF120c78),
+                text: 'Sign Up to continue',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Scaffold _ProfileSection(UserModel user, {bool Check = true}) {
     return Scaffold(
         appBar: AppBar(
             title: const BigText(
@@ -128,17 +120,16 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       _Container(
                           icon: Icons.person,
-                          txt: user.name ?? "Null",
+                          txt: user.displayName!,
                           clr: AppColors.mainColor),
                       SizedBox(
                         height: Dimension.Width30,
                       ),
-                      _Container(icon: Icons.phone, txt: user.phone ?? "Null"),
+                      _Container(icon: Icons.phone, txt: user.phoneNumber!),
                       SizedBox(
                         height: Dimension.Width30,
                       ),
-                      _Container(
-                          icon: Icons.email_rounded, txt: user.email ?? "Null"),
+                      _Container(icon: Icons.email_rounded, txt: user.email!),
                       SizedBox(
                         height: Dimension.Width30,
                       ),
@@ -148,9 +139,11 @@ class _ProfilePageState extends State<ProfilePage> {
                         },
                         child: _Container(
                           icon: Icons.location_on,
+                          // txt:
                           txt: Get.find<LocationRepoController>()
-                                  .getUserAddress()
-                                  ?.address ??
+                                  .addressList.isNotEmpty ? Get.find<LocationRepoController>()
+                              .addressList.last.addressDescription
+                                  :
                               "Press to add address",
                         ),
                       ),

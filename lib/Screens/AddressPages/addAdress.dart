@@ -7,16 +7,17 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:resturantapp/Routes/routesHelper.dart';
 import 'package:resturantapp/controller/auth_controller.dart';
-import 'package:resturantapp/controller/user_repo_controller.dart';
+import 'package:resturantapp/models/address_model.dart';
+
 import 'package:resturantapp/models/response_model.dart';
-import 'package:resturantapp/models/user_address_model.dart';
+
 import 'package:resturantapp/utils/colors.dart';
 import 'package:resturantapp/utils/dimmensions.dart';
 import 'package:resturantapp/widgets/BigText.dart';
-import 'package:resturantapp/widgets/CustomLoadingBar.dart';
 import 'package:resturantapp/widgets/snackbar.dart';
 
 import '../../controller/location_repo_controller.dart';
+import '../../widgets/CustomLoadingBar.dart';
 import '../../widgets/InputField.dart';
 import 'fullMapScreen.dart';
 
@@ -32,32 +33,31 @@ class _AddAdressState extends State<AddAdress> {
   final TextEditingController _contactPersonNumber = TextEditingController();
   final TextEditingController _contactPersonName = TextEditingController();
   bool loading = false;
-  bool _isLoggedIn = false;
+  double long = 67.0011;
+  double lat = 24.8607;
   CameraPosition _cameraPosition =
       const CameraPosition(target: LatLng(24.8607, 67.0011), zoom: 17);
 
   LatLng _intialPosition = const LatLng(24.8607, 67.0011);
-  double? long;
-  double? lat;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _isLoggedIn = Get.find<AuthRepoController>().isUserLoggedIn();
-    if (_isLoggedIn && Get.find<UserRepoController>().userModel == null) {
-      Get.find<UserRepoController>().getUserInfo();
+
+    if (Get.find<AuthRepoController>().userModel == null) {
+      Get.find<AuthRepoController>().getUserData();
     }
-    Get.find<LocationRepoController>().getUserAddress();
 
-    if (Get.find<LocationRepoController>().userAddressModel != null) {
-      long = Get.find<LocationRepoController>().userAddressModel?.longitude;
+    if (Get.find<LocationRepoController>().addressList.isNotEmpty) {
+      long = Get.find<LocationRepoController>().addressList.last.longitude;
 
-      lat = Get.find<LocationRepoController>().userAddressModel?.latitude;
+      lat = Get.find<LocationRepoController>().addressList.last.latitude;
       _cameraPosition =
-          CameraPosition(target: LatLng(lat ?? 24.8607, long ?? 67.0011));
-      _intialPosition = LatLng(lat ?? 24.8607, long ?? 67.0011);
+          CameraPosition(target: LatLng(lat, long ));
+      _intialPosition = LatLng(lat , long );
       _addressController.text =
-          Get.find<LocationRepoController>().userAddressModel?.address;
+          Get.find<LocationRepoController>().addressList.last.addressDescription;
     }
   }
 
@@ -72,41 +72,42 @@ class _AddAdressState extends State<AddAdress> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<UserRepoController>(builder: (userRepoController) {
+    return GetBuilder<AuthRepoController>(builder: (authRepoController) {
       return GetBuilder<LocationRepoController>(builder: (locRepoController) {
-        // ignore: duplicate_ignore
-        // ignore: unnecessary_null_comparison
-        if (userRepoController.userModel != null &&
+        if (authRepoController.userModel != null &&
             _contactPersonName.text.isEmpty) {
-          _contactPersonName.text = userRepoController.userModel.name!;
-          _contactPersonNumber.text = userRepoController.userModel.phone!;
-          if (locRepoController.addressList.isEmpty &&
-              locRepoController.userAddressModel != null) {
+          _contactPersonName.text = authRepoController.userModel!.displayName!;
+          _contactPersonNumber.text =
+              authRepoController.userModel!.phoneNumber!;
+          if (locRepoController.addressList.isEmpty ) {
             _addressController.text =
-                locRepoController.userAddressModel?.address ??
+                // locRepoController.addressList.last.addressDescription ??
                     "Press to add address";
           }
         }
         return Scaffold(
           bottomNavigationBar: GestureDetector(
             onTap: () async {
-              UserAddressModel userAddressModel = UserAddressModel(
-                  userId: userRepoController.userModel.id,
+
+              AddressModel userAddressModel = AddressModel(
                   latitude: _cameraPosition.target.latitude,
                   longitude: _cameraPosition.target.longitude,
-                  address: _addressController.text,
+
                   contactPersonNumber: _contactPersonNumber.text,
                   contactPersonName: _contactPersonName.text,
                   addressType: locRepoController
-                      .addressTypeList[locRepoController.addressTypeIndex]);
+                      .addressTypeList[locRepoController.addressTypeIndex],
+                   addressDescription: _addressController.text);
 
               ResponseModel res =
                   await locRepoController.addUserAddress(userAddressModel);
+
+
               await locRepoController.getUserAddressList();
 
               CustomSnackbar.showSnackbar(
                   description: res.message,
-                  isError: res.isSuccuess,
+                  isError: !res.isSuccuess,
                   title: "Address");
             },
             child: Container(
@@ -118,8 +119,7 @@ class _AddAdressState extends State<AddAdress> {
                     bottom: Dimension.Height10),
                 decoration: BoxDecoration(
                     color: AppColors.mainColor,
-                    borderRadius:
-                        BorderRadius.circular(Dimension.Width5 * 7)),
+                    borderRadius: BorderRadius.circular(Dimension.Width5 * 7)),
                 child: Center(
                     child: BigText(
                   text: "Save Address ",
@@ -152,68 +152,61 @@ class _AddAdressState extends State<AddAdress> {
                       decoration: BoxDecoration(
                           border:
                               Border.all(color: AppColors.mainColor, width: 2)),
-                      child: Stack(
-                        children: [
-                          GoogleMap(
-                            onTap: (latLng) {
-                              Get.toNamed(Routeshelper.geFullMapRoute(),
-                                  arguments: FullMap(
-                                    fromProfile: false,
-                                    fromAddress: true,
-                                    googleMapController:
-                                        locRepoController.mapController,
-                                  ));
-                            },
-                            initialCameraPosition: CameraPosition(
-                                target: LatLng(lat ?? 0, long ?? 0), zoom: 17),
-                            zoomControlsEnabled: false,
-                            compassEnabled: false,
-                            indoorViewEnabled: true,
-                            mapToolbarEnabled: false,
-                            myLocationEnabled: true, // Enable current location
-                            myLocationButtonEnabled: true,
-                            markers: {
-                              Marker(
-                                markerId: const MarkerId('Location'),
-                                position: LatLng(
-                                    _cameraPosition.target.latitude,
-                                    _cameraPosition.target.longitude),
-                              )
-                            },
-                            onCameraIdle: () async {
-                              if (!loading) {
-                                try {
-                                  loading =
-                                      true; // Set loading to true to prevent multiple calls
-                                  await locRepoController.updatePosition(
-                                      _cameraPosition.target.latitude,
-                                      _cameraPosition.target.longitude,
-                                      false);
-                                  _addressController.text =
-                                      locRepoController.currentPlacemark.name ??
-                                          (Get.find<LocationRepoController>()
-                                              .pickPlacemark
-                                              .name)!;
-                                } catch (e) {
-                                } finally {
-                                  loading =
-                                      false; // Reset loading status after operation
-                                }
-                              }
-                            },
-                            onCameraMove: ((position) {
-                              loading = true;
-                              _cameraPosition = position;
-                              loading = false;
-                            }),
-                            onMapCreated: (GoogleMapController mapController) {
-                              locRepoController.setMapController(mapController);
-                            },
-                          ),
-                          Get.find<LocationRepoController>().loading
-                              ? const Customloadingbar()
-                              : Container(),
-                        ],
+                      child: GoogleMap(
+                        onTap: (latLng) {
+                          Get.toNamed(Routeshelper.geFullMapRoute(),
+                              arguments: FullMap(
+                                fromProfile: false,
+                                fromAddress: true,
+                                googleMapController:
+                                    locRepoController.mapController,
+                              ));
+                        },
+                        initialCameraPosition: CameraPosition(
+                            target: LatLng(lat, long), zoom: 17),
+                        zoomControlsEnabled: false,
+                        compassEnabled: false,
+                        indoorViewEnabled: true,
+                        mapToolbarEnabled: false,
+                        myLocationEnabled: true, // Enable current location
+                        myLocationButtonEnabled: true,
+                        markers: {
+                          Marker(
+                            markerId: const MarkerId('Location'),
+                            position: LatLng(
+                                _cameraPosition.target.latitude,
+                                _cameraPosition.target.longitude),
+                          )
+                        },
+                        onCameraIdle: () async {
+                          loading =
+                          true;
+
+                          try {
+                            // Set loading to true to prevent multiple calls
+                            await locRepoController.updatePosition(
+                                _cameraPosition.target.latitude,
+                                _cameraPosition.target.longitude,
+                                false);
+                            _addressController.text =
+                                locRepoController.currentPlacemark.name ??
+                                    (Get.find<LocationRepoController>()
+                                        .pickPlacemark
+                                        .name)!;
+                          } catch (e) {}
+                            loading =
+                                false; // Reset loading status after operation
+
+                        },
+
+                        onCameraMove: ((position) {
+                          loading = true;
+                          _cameraPosition = position;
+                          loading = false;
+                        }),
+                        onMapCreated: (GoogleMapController mapController) {
+                          locRepoController.setMapController(mapController);
+                        },
                       ),
                     ),
                     Column(
@@ -269,11 +262,23 @@ class _AddAdressState extends State<AddAdress> {
                           padding: EdgeInsets.all(Dimension.Height10 * 0.7),
                           child: const BigText(text: "Delivery Address"),
                         ),
-                        CustomInputField(
-                          controller: _addressController,
-                          icon: CupertinoIcons.map,
-                          labelText: 'Delivery Address',
-                          maxLines: 2,
+                        Stack(
+                          children: [
+
+
+
+                            CustomInputField(
+                              controller: _addressController,
+                              icon: CupertinoIcons.map,
+                              labelText: 'Delivery Address',
+                              maxLines: 2,
+                            ),
+                            Get.find<LocationRepoController>().loading?  Positioned(
+                                top: Dimension.Height30/1.6,
+                                left:Dimension.MobileWidth/2.5,
+
+                                child: Customloadingbar()):Container(),
+                          ]
                         ),
                         Padding(
                           padding: EdgeInsets.all(Dimension.Height10 * 0.7),

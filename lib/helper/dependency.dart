@@ -2,20 +2,17 @@ import 'package:get/get.dart';
 import 'package:resturantapp/controller/auth_controller.dart';
 import 'package:resturantapp/controller/location_repo_controller.dart';
 import 'package:resturantapp/controller/payment_repo_controller.dart';
-import 'package:resturantapp/controller/user_repo_controller.dart';
-
-import 'package:resturantapp/data/repositories/laravel/user_repo.dart';
 import 'package:resturantapp/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../controller/cart_repo_controller.dart';
 import '../controller/product_repo_controller.dart';
 import '../data/api/apiClient.dart';
-import '../data/repositories/laravel/auth_Repo.dart';
-import '../data/repositories/laravel/cart_repo.dart';
-import '../data/repositories/laravel/location_repo.dart';
-import '../data/repositories/laravel/payment_repo.dart';
-import '../data/repositories/laravel/popular_product_repo.dart';
-import '../data/repositories/laravel/recommended_product_repo.dart';
+import '../data/repositories/auth_Repo.dart';
+import '../data/repositories/cart_repo.dart';
+import '../data/repositories/location_repo.dart';
+import '../data/repositories/payment_repo.dart';
+import '../data/repositories/popular_product_repo.dart';
+import '../data/repositories/recommended_product_repo.dart';
 
 Future<void> init() async {
   // Obtain shared preferences.
@@ -23,7 +20,9 @@ Future<void> init() async {
 
   Get.lazyPut(() => prefs);
   // Registering ApiClient
-  Get.lazyPut(() => ApiClient(appBaseUrl: Constants.BASE_URL),);
+  Get.lazyPut(
+    () => ApiClient(appBaseUrl: Constants.BASE_URL),
+  );
 
   // Registering repositories
   Get.lazyPut(
@@ -32,7 +31,7 @@ Future<void> init() async {
   Get.lazyPut(() => CartRepo(sharedPreferences: Get.find()));
   Get.lazyPut(() => RecommendedProductRepo(apiClient: Get.find()));
   Get.lazyPut(() => PopularProductRepo(apiClient: Get.find()));
-  Get.lazyPut(() => UserRepo(apiClient: Get.find()));
+
   Get.lazyPut(
       () => LocationRepo(apiClient: Get.find(), sharedPreferences: Get.find()));
   Get.lazyPut(() => PaymentRepo());
@@ -42,8 +41,7 @@ Future<void> init() async {
   Get.lazyPut(() => ProductRepoController(
       popularProductRepo: Get.find(), recommendedProductRepo: Get.find()));
   Get.lazyPut(() => CartRepoController(cartRepo: Get.find()));
-  Get.lazyPut(() =>
-      UserRepoController(userRepo: Get.find(), sharedPreferences: Get.find()));
+
   Get.lazyPut(() => LocationRepoController(locationRepo: Get.find()));
   Get.lazyPut(() => PaymentRepoController(paymentRepo: Get.find()));
 }

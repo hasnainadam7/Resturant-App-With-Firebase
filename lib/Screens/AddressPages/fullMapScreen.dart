@@ -43,22 +43,22 @@ class _FullMapState extends State<FullMap> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    Get.find<LocationRepoController>().getUserAddress();
     addressController.text =
         (Get.find<LocationRepoController>().pickPlacemark.name ??
                 Get.find<LocationRepoController>().currentPlacemark.name) ??
-            "no adress";
+            "No Address";
 
-    if (Get.find<LocationRepoController>().userAddressModel == null) {
+    if (Get.find<LocationRepoController>().addressList.isEmpty) {
       _latlng = const LatLng(11, 52);
       _cameraPosition = CameraPosition(target: _latlng, zoom: 17);
     } else {
+
       double? long =
-          Get.find<LocationRepoController>().userAddressModel?.longitude;
+          Get.find<LocationRepoController>().addressList.last.longitude?? 67.0011;
 
       double? lat =
-          Get.find<LocationRepoController>().userAddressModel?.latitude;
-      if (Get.find<LocationRepoController>().userAddressModel != null &&
+          Get.find<LocationRepoController>().addressList.last.latitude??24.8607;
+      if (Get.find<LocationRepoController>().addressList.isNotEmpty &&
           lat != null &&
           long != null) {
         _cameraPosition = CameraPosition(target: LatLng(lat, long));
@@ -120,7 +120,7 @@ class _FullMapState extends State<FullMap> {
                           child: SizedBox(
                             height: Dimension.Height10 * 4,
                             width: Dimension.Height10 * 4,
-                            child: Image.asset("assets/image/pick_marker.png"),
+                            child: Image.asset("assets/images/pick_marker.png"),
                           ),
                         ),
                   Positioned(

@@ -6,7 +6,7 @@ import 'package:resturantapp/utils/constants.dart';
 
 import 'package:resturantapp/widgets/snackbar.dart';
 
-import '../data/repositories/laravel/cart_repo.dart';
+import '../data/repositories/cart_repo.dart';
 import '../models/cart_models.dart';
 
 class CartRepoController extends GetxController {
@@ -23,10 +23,6 @@ class CartRepoController extends GetxController {
   List<CartModel> storageItems = [];
   List<CartModel> storageHistoryItems = [];
   List<String> CartHistory = [];
-
-  // void removeCart() {
-  //   cartRepo.removeCart();
-  // }
 
   void addItems(ProductsModel product, int quantity) {
     if (quantity > 20) {

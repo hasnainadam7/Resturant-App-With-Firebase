@@ -6,10 +6,11 @@ import 'package:get/get.dart';
 import "package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart";
 import 'package:resturantapp/Screens/CartPage/cartPage.dart';
 import 'package:resturantapp/Screens/MainHomeScreens/FoodPage.dart';
-import 'package:resturantapp/controller/user_repo_controller.dart';
+
 
 import 'package:resturantapp/utils/colors.dart';
 
+import '../../controller/auth_controller.dart';
 import '../../controller/cart_repo_controller.dart';
 import '../../controller/product_repo_controller.dart';
 
@@ -25,14 +26,14 @@ class MainScreen extends StatelessWidget {
 
     Cartpage(),
     const CartHistoryMainPage(), // Placeholder for a future page
-     const ProfilePage(), // Placeholder for a future page
+    ProfilePage(), // Placeholder for a future page
   ];
   Future<void> _loadResources() async {
     await Get.find<ProductRepoController>().getPopularList();
     await Get.find<ProductRepoController>().getRecommendedList();
-     Get.find<CartRepoController>().getCartData();
-      Get.find<CartRepoController>().getCartHistoryData();
-    await Get.find<UserRepoController>().getUserInfo();
+    Get.find<CartRepoController>().getCartData();
+    Get.find<CartRepoController>().getCartHistoryData();
+    await Get.find<AuthRepoController>().getUserData();
 
   }
 

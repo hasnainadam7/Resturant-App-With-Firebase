@@ -7,9 +7,9 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:resturantapp/data/api/apiChecker.dart';
 import 'package:http/http.dart' as http;
-import 'package:resturantapp/data/repositories/laravel/location_repo.dart';
+import 'package:resturantapp/data/repositories/location_repo.dart';
+import 'package:resturantapp/models/geo_AddressModel.dart';
 import 'package:resturantapp/models/response_model.dart';
-import 'package:resturantapp/models/user_address_model.dart';
 import '../models/address_model.dart';
 
 class LocationRepoController extends GetxController implements GetxService {
@@ -17,13 +17,10 @@ class LocationRepoController extends GetxController implements GetxService {
 
   LocationRepoController({required this.locationRepo});
 
-  List<AddressModel> _googlePlacesList = [];
-  List<AddressModel> get googlePlacesList => _googlePlacesList;
+  List<GeoCodeAddressModel> _googlePlacesList = [];
+  List<GeoCodeAddressModel> get googlePlacesList => _googlePlacesList;
 
   bool loading = false;
-
-  UserAddressModel? _userAddressModel;
-  UserAddressModel? get userAddressModel => _userAddressModel;
 
   late Position _currentPosition;
   late Position _pickPosition;
@@ -43,8 +40,6 @@ class LocationRepoController extends GetxController implements GetxService {
   bool get isZone => _isZone;
   bool get isBtnDisabled => _isBtnDisabled;
 
-  late List<UserAddressModel> _allAddressList;
-  List<UserAddressModel> get allAddressList => _allAddressList;
   List<String> addressTypeList = ["home", "office", "others"];
   int addressTypeIndex = 0;
 
@@ -53,9 +48,8 @@ class LocationRepoController extends GetxController implements GetxService {
     update();
     return addressTypeIndex;
   }
-
-  late List<UserAddressModel> _addressList = [];
-  List<UserAddressModel> get addressList => _addressList;
+  List<AddressModel> _addressList = [];
+  List<AddressModel> get addressList => _addressList;
 
   late GoogleMapController _mapController;
   GoogleMapController get mapController => _mapController;
@@ -70,7 +64,6 @@ class LocationRepoController extends GetxController implements GetxService {
   Future<void> updatePosition(
       double latitude, double longitude, bool fromAddress) async {
     loading = true;
-
     if (fromAddress) {
       _currentPosition = Position(
         longitude: longitude,
@@ -98,14 +91,14 @@ class LocationRepoController extends GetxController implements GetxService {
         speedAccuracy: 1,
       );
     }
-    ResponseModel getZoneResponseModel = await getZone(
-        lat: latitude.toString(),
-        long: longitude.toString(),
-        markerLoad: false);
-    _isBtnDisabled = !getZoneResponseModel.isSuccuess;
+    // ResponseModel getZoneResponseModel = await getZone(
+    //     lat: latitude.toString(),
+    //     long: longitude.toString(),
+    //     markerLoad: false);
+    // _isBtnDisabled = !getZoneResponseModel.isSuccuess;
 
     if (_changeAddress) {
-      AddressModel? addressModel =
+      GeoCodeAddressModel? addressModel =
           await getAddressFromGeocode(LatLng(latitude, longitude));
 
       if (fromAddress && addressModel != null) {
@@ -113,124 +106,109 @@ class LocationRepoController extends GetxController implements GetxService {
       } else {
         _pickPlacemark = Placemark(name: addressModel?.displayName);
       }
-
     }
 
     loading = false;
     update();
   }
 
-  Future<AddressModel?> getAddressFromGeocode(LatLng latLng) async {
+  Future<GeoCodeAddressModel?> getAddressFromGeocode(LatLng latLng) async {
     loading = true;
-    // await Future.delayed(const Duration(seconds: 5));
-    // Response res = await locationRepo.getAddressfromGeocode(latLng);
-    final res = (await http.get(Uri.parse(
-            'https://nominatim.openstreetmap.org/reverse?format=json&lat=${latLng.latitude}&lon=${latLng.longitude}')));
 
-
-    AddressModel? addressModel;
-
-    // ignore: unnecessary_null_comparison
-    if (res.body != null) {
-      addressModel = AddressModel.fromJson(jsonDecode(res.body));
+    try {
+      var res = await locationRepo.getAddressfromGeocode(latLng);
+      if (res.body != null && res.statusCode == 200) {
+        GeoCodeAddressModel geoaddressModel =
+            GeoCodeAddressModel.fromJson(jsonDecode(res.body));
+        loading = false;
+        return geoaddressModel;
+      } else {
+        // Handle the case where the response body is null or status code isn't 200
+        loading = false;
+        return null;
+      }
+    } catch (e) {
+      // Handle any exceptions that might occur
+      print("Error fetching address from geocode: $e");
+      loading = false;
+      return null;
     }
-
-    getUserAddress();
-    loading = true;
-
-    return addressModel;
   }
 
   late Map<String, dynamic> _getAddress;
   Map<String, dynamic> get getAddress => _getAddress;
 
-  UserAddressModel? getUserAddress() {
-    if (locationRepo.getUserAddress().isNotEmpty) {
-      String addressString = locationRepo.getUserAddress();
-      _getAddress = jsonDecode(addressString);
-      // ignore: unnecessary_null_comparison
-      if (_getAddress != null) {
-        _userAddressModel = UserAddressModel.fromJson(_getAddress);
-        return _userAddressModel;
-      }
-    }
-
-    return null;
-  }
-
-  Future<ResponseModel> addUserAddress(UserAddressModel address) async {
+  Future<ResponseModel> addUserAddress(AddressModel address) async {
+    print(address.addressDescription);
+    print(address.longitude);
+    print(address.contactPersonNumber);
+    print(address.addressType);
+    print(address.contactPersonName);
+    print(address.latitude);
+    print(loading);
     loading = true;
-
-    Response res = await locationRepo.addUserAddress(address);
-
-    ResponseModel responseModel;
-    if (res.statusCode == 200) {
-      saveUserAddress(address);
-
-      responseModel = ResponseModel(false, "Address Saved Successfully");
-    } else {
-      responseModel = ResponseModel(true, res.body);
-    }
-
+    print(loading);
+    ResponseModel res = await locationRepo.addUserAddress(address);
+    print(loading);
     loading = false;
+    print(loading);
     update();
-    return responseModel;
+    return res;
   }
 
-  Future<ResponseModel> getZone(
-      {required String lat,
-      required String long,
-      required bool markerLoad}) async {
-    late ResponseModel resModel;
-
-    if (markerLoad) {
-      _isLoading = true;
-    } else {
-      _isLoading = false;
-    }
-    update();
-
-    Response res = await locationRepo.getZone(lat, long);
-    if (res.statusCode == 200) {
-      _isZone = true;
-      resModel = ResponseModel(true, res.body["zone-id"].toString());
-    } else {
-      _isZone = false;
-      resModel = ResponseModel(true, res.statusText.toString());
-    }
-    update();
-
-    return resModel;
-  }
+  // Future<ResponseModel> getZone(
+  //     {required String lat,
+  //     required String long,
+  //     required bool markerLoad}) async {
+  //   late ResponseModel resModel;
+  //
+  //   // if (markerLoad) {
+  //   //   _isLoading = true;
+  //   // } else {
+  //   //   _isLoading = false;
+  //   // }
+  //   update();
+  //
+  //   Response res = await locationRepo.getZone(lat, long);
+  //   if (res.statusCode == 200) {
+  //     _isZone = true;
+  //     resModel = ResponseModel(true, res.body["zone-id"].toString());
+  //   } else {
+  //     _isZone = false;
+  //     resModel = ResponseModel(true, res.statusText.toString());
+  //   }
+  //   update();
+  //
+  //   return resModel;
+  // }
 
   Future<ResponseModel> getUserAddressList() async {
     loading = true;
+    try {
+      ResponseModel responseModel = await locationRepo.getUserAddressList();
 
-    Response res = await locationRepo.getUserAddressList();
-    if (res.statusCode == 200) {
-      _allAddressList = [];
-      _addressList = [];
-      res.body.forEach((address) {
-        _allAddressList.add(UserAddressModel.fromJson(address));
+      if (responseModel.data != null) {
+        print(responseModel.data);
+        _addressList = [];
 
-        _addressList.add(UserAddressModel.fromJson(address));
-      });
-      update();
-      loading = false;
-      return ResponseModel(false, "Addresses loaded");
-    } else {
-      loading = false;
-      update();
-      return ResponseModel(true, "Address isnt loaded");
+        responseModel.data.forEach((address) {
+          _addressList.add(AddressModel.fromJson(address));
+        });
+        print(addressList.last.addressDescription);
+        update();
+        loading = false;
+        return ResponseModel(false, "Addresses loaded");
+      } else {
+        loading = false;
+        update();
+        return ResponseModel(true, "Address isnot loaded");
+      }
+    } catch (e) {
+     return ResponseModel(false, e.toString());
     }
   }
 
-  Future<void> saveUserAddress(UserAddressModel userAddressModel) async {
-    String data = jsonEncode(userAddressModel.toJson());
-    await locationRepo.saveUserAddress(data);
-  }
-
-  Future<List<AddressModel>> getSearchLocation(
+  Future<List<GeoCodeAddressModel>> getSearchLocation(
       BuildContext context, String text) async {
     if (text.isEmpty) {
       return [];
@@ -239,11 +217,12 @@ class LocationRepoController extends GetxController implements GetxService {
 
       final res = await http.get(Uri.parse(
           'https://nominatim.openstreetmap.org/search?q=$text&format=json'));
+      print("IReacherd "+res.body);
       if (res.statusCode == 200) {
         _googlePlacesList = [];
         final List<dynamic> parsed = jsonDecode(res.body);
         for (dynamic data in parsed) {
-          _googlePlacesList.add(AddressModel.fromJson(data));
+          _googlePlacesList.add(GeoCodeAddressModel.fromJson(data));
         }
       } else {
         ApiChecker.checker(res.statusCode, res.body);

@@ -30,16 +30,12 @@ class Constants {
   static final String GET_USER_ADDRESS_LIST_API = dotenv.env['GET_USER_ADDRESS_LIST_API']!;
 
   // Local Storages Constants
-  static final String TOKEN = dotenv.env['TOKEN']!;
-  static final String PHONE = dotenv.env['PHONE']!;
-  static final String PASSWORD = dotenv.env['PASSWORD']!;
+  static final String UID = dotenv.env['UID']!;
   static final String CARTLIST = dotenv.env['CARTLIST']!;
   static final String CARTHISTORYLIST = dotenv.env['CARTHISTORYLIST']!;
+//stripe crendtials
+  static final String STRIPE_PK = dotenv.env['STRIPE_PK']!;
+  static final String STRIPE_SK = dotenv.env['STRIPE_SK']!;
 
-  // static final String STRIPE_PK = dotenv.env['STRIPE_PK']!;
-  // static final String STRIPE_SK = dotenv.env['STRIPE_SK']!;
 
-//Hasnain's Account Stripe Keys
-  static const String STRIPE_PK = "pk_test_51PTzNBFkqBibnSXSbwNIMWTDyyMNOrBYjEPG854Zb1fjy0B0H58fN8agH4XzIFeNJCF926g8Ex4glLAdlLh7wejJ00EIRKlOLf";
-  static const String STRIPE_SK = "sk_test_51PTzNBFkqBibnSXS6K5FRtHwWhjPLA1JssM3xfKd7RkDyBxBDoJbjpGpa41d0ThUhq4qnurntBeeeGRgr0H2g6NR007F8E5UqP";
 }

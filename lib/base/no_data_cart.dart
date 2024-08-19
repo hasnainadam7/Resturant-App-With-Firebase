@@ -13,7 +13,7 @@ class NoDataImgCart extends StatelessWidget {
   const NoDataImgCart(
       {super.key,
       required this.text,
-      this.ImgPath = "assets/image/empty_cart.png",  this.clr= const Color(0xFFDF5E00)});
+      this.ImgPath = "assets/images/empty_cart.png",  this.clr= const Color(0xFFDF5E00)});
 
   @override
   Widget build(BuildContext context) {

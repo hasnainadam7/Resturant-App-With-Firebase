@@ -128,7 +128,7 @@ class PopularFoodDetails extends StatelessWidget {
   }
 
   Stack _PopularStack(ProductsModel product) {
-    final String imageUrl = "${Constants.BASE_URL}uploads/${product.img}";
+    final String imageUrl = product.img??"";
     String name = product.name ?? 'Example';
     int stars = product.stars ?? 0;
     String description =
@@ -148,7 +148,7 @@ class PopularFoodDetails extends StatelessWidget {
             decoration: BoxDecoration(
               image: DecorationImage(
                 fit: BoxFit.cover,
-                image: NetworkImage(imageUrl),
+                image: AssetImage(imageUrl),
               ),
             ),
           ),

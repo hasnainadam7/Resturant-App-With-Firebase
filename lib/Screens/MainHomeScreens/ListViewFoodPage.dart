@@ -23,6 +23,7 @@ class ListViewContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<ProductRepoController>(builder: (context) {
       List<dynamic> products = context.getPopularProductList;
+
       int Items = products.length;
       return context.isloaded
           ? Container(
@@ -47,7 +48,7 @@ class ListViewContainer extends StatelessWidget {
   }
 
   Column _ListColumn(ProductsModel product, int index) {
-    String imageUrl = "${Constants.BASE_URL}uploads/${product.img}";
+    String imageUrl = product.img??"Erorr";
     String Name = product.name ?? 'Example';
     String Description =
         product.description ?? "invalid description 404 error not found";
@@ -67,7 +68,7 @@ class ListViewContainer extends StatelessWidget {
                 decoration: BoxDecoration(
                   color:  index%2==0 ? AppColors.blueColor:AppColors.purpleColor,
                     image: DecorationImage(
-                        fit: BoxFit.cover, image: NetworkImage(imageUrl)),
+                        fit: BoxFit.cover, image:AssetImage(imageUrl)),
                     borderRadius:
                         BorderRadius.circular(Dimension.BorderRadius5)),
                 width: Dimension.HomeListViewImageHeight,

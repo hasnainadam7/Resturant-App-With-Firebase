@@ -123,7 +123,7 @@ class _SliderRecommendedFoodState extends State<SliderRecommendedFood> {
                   BorderRadius.circular(Dimension.BorderRadius5 * 6),
               image: DecorationImage(
                 fit: BoxFit.cover,
-                image: NetworkImage("${Constants.BASE_URL}uploads/$imageUrl"),
+                image: AssetImage(imageUrl),
               ),
             ),
           ),

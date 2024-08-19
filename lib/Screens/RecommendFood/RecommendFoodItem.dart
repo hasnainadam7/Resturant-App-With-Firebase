@@ -138,7 +138,7 @@ class RecommendFood extends StatelessWidget {
   }
 
   CustomScrollView _CustomScrollView(ProductsModel product,String page) {
-    final String imageUrl = "${Constants.BASE_URL}uploads/${product.img}";
+    final String imageUrl = product.img??"";
     String name = product.name ?? 'Example';
     String description = product.description ?? "Invalid description, 404 error not found";
 
@@ -189,7 +189,7 @@ class RecommendFood extends StatelessWidget {
           backgroundColor: AppColors.yellowColor,
           expandedHeight: 300,
           flexibleSpace: FlexibleSpaceBar(
-            background: Image.network(
+            background: Image.asset(
               imageUrl,
               width: double.maxFinite,
               fit: BoxFit.cover,

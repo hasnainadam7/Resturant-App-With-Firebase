@@ -130,8 +130,7 @@ class CartHistoryMainPage extends StatelessWidget {
                                                         Dimension.Height15),
                                                 image: DecorationImage(
                                                     fit: BoxFit.cover,
-                                                    image: NetworkImage(
-                                                        Constants.IMG_URL_API +
+                                                    image: AssetImage(
                                                             updatedHistory[
                                                                     ImgCounter]
                                                                 .img!))),
@@ -198,7 +197,7 @@ class CartHistoryMainPage extends StatelessWidget {
           ),
         ) : const Scaffold(
             body:
-            NoDataImgCart(text: 'You didnt buy anything so far',ImgPath: "assets/image/empty_box.png",));
+            NoDataImgCart(text: 'You didnt buy anything so far',ImgPath: "assets/images/empty_box.png",));
       },
     );
   }

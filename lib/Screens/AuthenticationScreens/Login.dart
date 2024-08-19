@@ -2,7 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:resturantapp/controller/user_repo_controller.dart';
+
+import 'package:resturantapp/models/response_model.dart';
 import 'package:resturantapp/utils/colors.dart';
 import 'package:resturantapp/utils/dimmensions.dart';
 import 'package:resturantapp/widgets/BigText.dart';
@@ -29,20 +30,21 @@ class Login extends StatelessWidget {
     if (email.isEmpty || password.length < 6 || !GetUtils.isEmail(email)) {
       CustomSnackbar.showSnackbar(description: "Please fill the box Correctly");
     } else {
-      await authrepo.login(email, password).then((status) async {
-        if (status.isSuccuess) {
+     ResponseModel responseModel =  await authrepo.login(email, password);
+        if (responseModel.isSuccuess) {
           CustomSnackbar.showSnackbar(
-              description: "Registration Successfully done",
-              isError: false,
-              title: "Wellcome");
-          await Get.find<UserRepoController>().getUserInfo();
-
-
-          Navigator.pushReplacementNamed(context, Routeshelper.getFoodHomePageRoute(0));
+              description: responseModel.message,
+              title: "Welcome");
+          Navigator.pop(context);
+          // Navigator.pushNamedAndRemoveUntil(
+          //   context,
+          //   Routeshelper.getFoodHomePageRoute(0),
+          //       (Route<dynamic> route) => false, // Removes all the routes
+          // );
         } else {
-          CustomSnackbar.showSnackbar(description: status.message.toString());
+          CustomSnackbar.showSnackbar(description: responseModel.message.toString());
         }
-      });
+
     }
   }
 
@@ -70,7 +72,7 @@ class Login extends StatelessWidget {
                       decoration: const BoxDecoration(
                           image: DecorationImage(
                               image:
-                                  AssetImage("assets/image/logo part 1.png"))),
+                                  AssetImage("assets/images/logo part 1.png"))),
                     ),
                     Align(
                       alignment: Alignment.centerLeft,
@@ -130,19 +132,19 @@ class Login extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SocialMediaIcons(
-                          imgUrl: 'assets/image/f.png',
+                          imgUrl: 'assets/images/f.png',
                         ),
                         SizedBox(
                           width: Dimension.Width30,
                         ),
                         const SocialMediaIcons(
-                          imgUrl: 'assets/image/g.png',
+                          imgUrl: 'assets/images/g.png',
                         ),
                         SizedBox(
                           width: Dimension.Width30,
                         ),
                         const SocialMediaIcons(
-                          imgUrl: 'assets/image/t.png',
+                          imgUrl: 'assets/images/t.png',
                         ),
                       ],
                     ),
@@ -151,7 +153,10 @@ class Login extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Get.offNamed(Routeshelper.getRegisrationPageRoute());
+                        Navigator.pushReplacementNamed(
+                          context,
+                          Routeshelper.getRegisrationPageRoute(),
+                        );
                       },
                       child: Wrap(
                         children: [

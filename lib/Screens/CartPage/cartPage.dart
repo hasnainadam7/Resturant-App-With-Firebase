@@ -74,8 +74,8 @@ class Cartpage extends StatelessWidget {
                               BorderRadius.circular(Dimension.Width5 * 7)),
                       child: GestureDetector(
                         onTap: () async {
-                          print("Am i here");
-                          if (Get.find<AuthRepoController>().isUserLoggedIn()) {
+                        try{
+                          if (await Get.find<AuthRepoController>().isUserSigned()) {
                             if (Get.find<LocationRepoController>()
                                 .addressList
                                 .isEmpty) {
@@ -83,8 +83,8 @@ class Cartpage extends StatelessWidget {
                             } else {
                               try {
                                 ResponseModel res =
-                                    await Get.find<PaymentRepoController>()
-                                        .makePayment();
+                                await Get.find<PaymentRepoController>()
+                                    .makePayment();
 
                                 if (!res.isSuccuess) {
                                   CustomSnackbar.showSnackbar(
@@ -104,6 +104,10 @@ class Cartpage extends StatelessWidget {
                           } else {
                             Get.toNamed(Routeshelper.getLoginPageRoute());
                           }
+                        }catch(e){
+                          print(e.toString());
+                        }
+
                         },
                         child: Center(
                             child: BigText(
@@ -189,8 +193,8 @@ class Cartpage extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       image: DecorationImage(
                                         fit: BoxFit.cover,
-                                        image: NetworkImage(
-                                            "${Constants.BASE_URL}uploads/${cartItem.img}"),
+                                        image: AssetImage(
+                                            cartItem.img??""),
                                       ),
                                       borderRadius: BorderRadius.circular(
                                           Dimension.BorderRadius5),

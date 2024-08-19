@@ -1,12 +1,12 @@
 // ignore_for_file: non_constant_identifier_names
 
-class CompleteRegistrationModel {
+class RegistrationModel {
   final String phone;
   final String f_name;
   final String email;
   final String password;
 
-  CompleteRegistrationModel({
+  RegistrationModel({
     required this.phone,
     required this.f_name,
     required this.email,
@@ -24,8 +24,8 @@ class CompleteRegistrationModel {
   }
 
   // Factory method to create the model from JSON
-  factory CompleteRegistrationModel.fromJson(Map<String, dynamic> json) {
-    return CompleteRegistrationModel(
+  factory RegistrationModel.fromJson(Map<String, dynamic> json) {
+    return RegistrationModel(
       phone: json['phone'],
       f_name: json['f_name'],
       email: json['email'],

@@ -5,8 +5,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resturantapp/Routes/routesHelper.dart';
+import 'package:resturantapp/controller/auth_controller.dart';
 import 'package:resturantapp/controller/location_repo_controller.dart';
-import 'package:resturantapp/controller/user_repo_controller.dart';
+
 import 'package:resturantapp/utils/dimmensions.dart';
 
 import '../../controller/cart_repo_controller.dart';
@@ -27,9 +28,11 @@ class _SplashScreenState extends State<SplashScreen>
     await Get.find<ProductRepoController>().getPopularList();
     await Get.find<ProductRepoController>().getRecommendedList();
     Get.find<CartRepoController>().getCartData();
-     Get.find<UserRepoController>().getUserInfo();
+
+    await Get.find<AuthRepoController>().getUserData();
+
     await Get.find<LocationRepoController>().getUserAddressList();
-    Get.find<LocationRepoController>().getUserAddress();
+   await Get.find<LocationRepoController>().getUserAddressList();
   }
 
   @override
@@ -50,9 +53,9 @@ class _SplashScreenState extends State<SplashScreen>
           ..forward();
     animation = CurvedAnimation(parent: controller, curve: Curves.linear);
 
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(const Duration(seconds: 3), () {
 
-      Navigator.pushReplacementNamed(context, Routeshelper.getFoodHomePageRoute(0));
+      Navigator.pushReplacementNamed(context, Routeshelper.getFoodHomePageRoute(3));
 
     });
   }
@@ -67,12 +70,12 @@ class _SplashScreenState extends State<SplashScreen>
               scale: animation,
               child: Center(
                   child: Image.asset(
-                "assets/image/logo part 1.png",
+                "assets/images/logo part 1.png",
                 width: Dimension.Width30 * 15,
               ))),
           Center(
               child: Image.asset(
-            "assets/image/logo part 2.png",
+            "assets/images/logo part 2.png",
             width: Dimension.Width30 * 15,
           ))
         ],

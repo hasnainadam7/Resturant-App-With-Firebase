@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:resturantapp/models/cart_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../utils/constants.dart';
+import '../../utils/constants.dart';
 
 
 
